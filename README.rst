@@ -47,3 +47,4 @@ To-do:
 
 - benchmark against other Python solutions.  
 
+Public Domain.
