@@ -35,13 +35,11 @@ What does Petite offer?
 Drawbacks:
 * 
 - Zip does not offer solid-block compression, so not much space can be saved. 
-- While adding entries is quick, compacting entails rebuilding the database, 
-  akin to semidbm. 
+- While adding entries is quick, compacting entails rebuilding the database, akin to semidbm. 
  
  
 To-do:
-- Find if it's somehow possible to regenerate the database/zipfile withoud 
-  de/recompression, perhaps using ZipFile's compress_size, header_offset
+- Find if it's somehow possible to regenerate the database/zipfile without de/recompression, perhaps using ZipFile's compress_size, header_offset
 
 - The small footprint goal is not currently achieved. Therefore, add support for solid-block compression, currently looking at LZMA or 7z.
 
