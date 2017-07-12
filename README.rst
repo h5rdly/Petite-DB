@@ -17,13 +17,9 @@ via the [link]dbm module. However, I was unsatisfied with dbm -
 
 
 Solutions I've tried:
-- LMDB - cross platform, has a Python package, used by SQLite, data scientists 
- and many more. This is a well acclaimed k-v solution that uses transactions, 
- thus complicating the approach somewhat. Most importantly (to my needs), [link]it does not support compression.
+- LMDB - cross platform, has a Python package, used by SQLite, data scientists and many more. This is a well acclaimed k-v solution that uses transactions, thus complicating the approach somewhat. Most importantly (to my needs), [link]it does not support compression.
 
-- semidbm - a much better python dbm implementation. while fast and pure 
-  python (pip install always works, no need for the 3Gb Visual 2014 monster thingy 
-  on Windows), it too offers no built-in compression.
+- semidbm - a much better python dbm implementation. while fast and pure python (pip install always works, no need for the 3Gb Visual 2014 monster thingy on Windows), it too offers no built-in compression.
 
 
 What does Petite offer?
@@ -47,8 +43,7 @@ To-do:
 - Find if it's somehow possible to regenerate the database/zipfile withoud 
   de/recompression, perhaps using ZipFile's compress_size, header_offset
 
-- The small footprint goal is not currently achieved. Therefore:
-    - Add support for solid-block compression, currently looking at LZMA or 7z.
+- The small footprint goal is not currently achieved. Therefore, add support for solid-block compression, currently looking at LZMA or 7z.
 
 - benchmark against other Python solutions.  
 
