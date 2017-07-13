@@ -161,8 +161,8 @@ class Zdbm():
         deleted_as_string=''              
         
         if self._compact_threshold and self._size>= self._compact_threshold:    
-             # Compact if threshold passed or explicitly asked 
-             # NTS add threshold as relative to initial size 
+            # Compact if threshold passed or explicitly asked 
+            # NTS add threshold as relative to initial size 
             self.compact()
         
         # No compacting or done outside close(), appending current list of deleted entries
