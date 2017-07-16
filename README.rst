@@ -1,5 +1,9 @@
 .. code-block:: python
 
+  #                                              Petite
+  #                                              ------
+  #                         Storing key-value strings in zip files since 2017            
+  
   import petite
   dbpath='path/my_dbm_file'
   
@@ -13,7 +17,7 @@
   # As expected in a dictionary  
   pdict['1st_entry']='new_value'         # my_value1 is overrwritten
   
-  # pdict.keys() will get you there as well
+  # pdict.keys() to get a list of keys
   for key in pdict:
     print (key)
   
