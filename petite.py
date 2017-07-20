@@ -67,11 +67,13 @@ class Zdbm():
     dictionary-like manner  '''
     
     
-    def __init__(self, zdbfile=None, keys_as_property=False, COMPACT_AT_MB=100, 
-                 verify_on_clear=False):
+    def __init__(self, zdbfile=None, compression='zip', keys_as_property= True, 
+                 COMPACT_AT_MB=100, verify_on_clear=False):
         
         '''
         keys_as_property - Get keys with .keys instead of .keys() when True. 
+        
+        compression -   the compression scheme used. only zip is curently supoprted 
         
         COMPACT_AT_MB - upon closing, compact database if above that size in Mb. 
                         0/False to disable auto-compact.
@@ -79,16 +81,18 @@ class Zdbm():
         verify_on_clear - verify action when invoking .clear() method
         '''
         
+        if not compression== 'zip':
+            print ("Currently only zip('zip') compression is suported")
+            #return
+            
         self._compact_threshold=COMPACT_AT_MB*1024*1024
         self._verify_on_clear= verify_on_clear
         self.mark_as_deleted=''   #Used by __delitem__ to mark deleted entries
+        self.keys_as_property=keys_as_property
         
-        if keys_as_property:
-           self.keys= self.keys()
-            
         if zdbfile:
-            self.open(zdbfile)
-        
+            self.open(zdbfile)   
+            
         
     # Properties
     # ----------
@@ -146,10 +150,21 @@ class Zdbm():
                     # persistent, aka not an on-disk modification
                     for removed_entry in self._outdated_keys:
                         try:
-                            del self.zdbm.NameToInfo[removed_entry]
+                            del self.zdbm.NameToInfo[removed_entry.decode(ENC)]
                         except KeyError:
                             pass
-                
+                finally:
+                    # Zdbm instance was opened sucessfully, making keys() a
+                    # property
+                    
+                    if self.keys_as_property:
+                        try:
+                            self.keys= self.keys() 
+                        except:
+                            # When reopening a db file in the same session, 
+                            # keys was already made a property
+                            pass  
+                    
                 self._outdated.close()
 
     
@@ -167,15 +182,15 @@ class Zdbm():
         
         # No compacting or done outside close(), appending current list of deleted entries
         deleted_as_string= '\n'.join(item for item in self._outdated_keys)
-        print('deleted_as_string: ', deleted_as_string)
+        #print('deleted_as_string: ', deleted_as_string)
+        
         # Flush all deleted entries to a single temp file. None if compacted. 
         with zf(self.db+'.zdb_o_', 'a', allowZip64=True) as self.new_outdated:
             # Flush to a new temp file
-            self.new_outdated.writestr('outdated keys', deleted_as_string)
+            self.new_outdated.writestr('outdated keys', deleted_as_string.encode(ENC))
         
         # Remove old list, rename temp file back to the original name
         os.remove(self.db+'.zdb_o')
-        print('removed old')
         os.rename(self.db+'.zdb_o_', self.db+'.zdb_o') 
          
         self.zdbm.close()
@@ -252,7 +267,7 @@ class Zdbm():
         
         # Close and delete
         self.zdbm.close()
-        os.remove(self.db)
+        os.remove(self.db+'.zdb')
         os.remove(self.db+'.zdb_o')
         
         # Open new file with same name
@@ -263,17 +278,17 @@ class Zdbm():
     # ----------------
     
     ''' Include: __getitem__() , __setitem__() , __delitem__() , __enter__() , 
-         __exit__() , __iter__() '''
+         __exit__() , __len__(), __iter__() '''
     
     @if_db_open
     def __getitem__(self, key):         # validate existence of archive and item
         try:
-            value = self.zdbm.read(key)
+            value = self.zdbm.read(key.encode(ENC))
         except KeyError:
             print ('Non Existent key')
         else:
             if value:
-                return value
+                return value.decode(ENC)
             else:
                 # Empty values mark deleted values that have not yet been purged
                 print ('Non Existent key')
@@ -292,10 +307,10 @@ class Zdbm():
             self._outdated_keys.remove(key) 
             
         try:
-            self.zdbm.writestr(key, value)    
+            self.zdbm.writestr(key.encode(ENC), value.encode(ENC))    
         except:  #this isn't extensive, pick another way
             print('Warning - Non string value passed. Saved as string')
-            self.zdbm.writestr(str(key), str(value))
+            self.zdbm.writestr(str(key).encode(ENC), str(value).encode(ENC))
         
     
     @if_db_open
@@ -311,7 +326,7 @@ class Zdbm():
         # Deleted key updated with an empty value for added precaution    
         print ('Key set to be deleted, will be permanently removed upon purge()')
         print ('Ignore the warning \n')
-        self.__setitem__(key, self.mark_as_deleted) 
+        self.__setitem__(key.encode(ENC), self.mark_as_deleted) 
         
         
         # Adding key to the removed list and removing from the key index
@@ -336,6 +351,15 @@ class Zdbm():
         
         for key in self.zdbm.NameToInfo:
             yield key
+    
+    
+    @if_db_open
+    def __len__(self):
+        '''Returns number of active entries in the database, aka not including 
+        outdated or logically deleted ones'''
+        
+        return self.zdbm.NameToInfo.__len__()
+    
     
     '''
     def __repr__(self):
