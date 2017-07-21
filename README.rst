@@ -46,9 +46,9 @@ Petite
 
 
 Python offers persistent key-value storage (saving dictionaries to disk) 
-via the [link]dbm module. However, I was unsatisfied with dbm - 
+via the `dbm <https://docs.python.org/3/library/dbm.html>`_ module. However, I was unsatisfied with dbm - 
 
-- The API to all backends but the deprecated Berkeley DB (``dbhash``) is not complete - 
+- The API to all backends but the deprecated Berkeley DB (`dbhash <https://docs.python.org/2/library/dbhash.html>`_) is not complete - 
   no iteration, no clear() method. 
 - While Berkeley DB offered a complete API, and was available on both Windows
   and Linux, it was deprecated on Python 3.
@@ -69,8 +69,7 @@ Solutions I've tried:
 What does Petite offer?
 -----------------------
 
-- A persistent dictionary interface:
-  [example goes here]
+- A persistent dictionary interface
   
 - no need for sync() / commit()
 
